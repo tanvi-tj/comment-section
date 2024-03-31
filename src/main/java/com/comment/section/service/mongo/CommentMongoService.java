@@ -40,9 +40,23 @@ public class CommentMongoService {
         return mongoTemplate.findAndModify(Query.query(criteria), update, Comment.class);
     }
 
+    public Comment removeLike(final String commentId) {
+        final Update update = new Update();
+        update.inc(Comment.FieldConstants.LIKE_COUNT, -1);
+        Criteria criteria = Criteria.where(Comment.FieldConstants.COMMENT_ID).is(commentId);
+        return mongoTemplate.findAndModify(Query.query(criteria), update, Comment.class);
+    }
+
     public Comment addDislike(final String commentId) {
         final Update update = new Update();
         update.inc(Comment.FieldConstants.DISLIKE_COUNT, 1);
+        Criteria criteria = Criteria.where(Comment.FieldConstants.COMMENT_ID).is(commentId);
+        return  mongoTemplate.findAndModify(Query.query(criteria), update, Comment.class);
+    }
+
+    public Comment removeDislike(final String commentId) {
+        final Update update = new Update();
+        update.inc(Comment.FieldConstants.DISLIKE_COUNT, -1);
         Criteria criteria = Criteria.where(Comment.FieldConstants.COMMENT_ID).is(commentId);
         return  mongoTemplate.findAndModify(Query.query(criteria), update, Comment.class);
     }

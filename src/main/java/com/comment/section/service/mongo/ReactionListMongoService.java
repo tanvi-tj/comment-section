@@ -26,6 +26,14 @@ public class ReactionListMongoService {
         return mongoTemplate.upsert(Query.query(criteria), update, ReactionList.class);
     };
 
+    public UpdateResult removeUserFromReactionList(final String commentId, final String name, final ReactionList.ReactionType type) {
+        final Update update = new Update();
+        update.pull(ReactionList.FieldConstants.USER_LIST, name);
+        Criteria criteria = Criteria.where(ReactionList.FieldConstants.COMMENT_ID).is(commentId)
+                .andOperator(Criteria.where(ReactionList.FieldConstants.REACTION_TYPE).is(type));
+        return mongoTemplate.upsert(Query.query(criteria), update, ReactionList.class);
+    };
+
     public Optional<ReactionList> findByCommentId(final String commentId, final ReactionList.ReactionType type) {
         final Query query = new Query()
                 .addCriteria(Criteria.where(ReactionList.FieldConstants.COMMENT_ID).is(commentId)

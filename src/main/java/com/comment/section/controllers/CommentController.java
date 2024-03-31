@@ -46,17 +46,25 @@ public class CommentController {
     @GetMapping("/like/add")
     public int addLike(@RequestParam(name = "comment_id") final String commentId,
                                 @RequestParam(name = "user") final String user) {
-          final UpdateResult result = reactionListMongoService.addUserToReactionList(commentId, user, ReactionList.ReactionType.LIKE);
-          if(result.getMatchedCount()==result.getModifiedCount()){
-              commentMongoService.addLike(commentId);
-              return 1;
-          }
-          return 0;
+        final UpdateResult removeresult = reactionListMongoService.removeUserFromReactionList(commentId, user, ReactionList.ReactionType.DISLIKE);
+        if(removeresult.getMatchedCount()==removeresult.getModifiedCount()){
+            commentMongoService.removeDislike(commentId);
+        }
+        final UpdateResult addresult = reactionListMongoService.addUserToReactionList(commentId, user, ReactionList.ReactionType.LIKE);
+        if(addresult.getMatchedCount()==addresult.getModifiedCount()){
+            commentMongoService.addLike(commentId);
+            return 1;
+        }
+        return 0;
     }
 
     @GetMapping("/dislike/add")
     public int addDislike(@RequestParam(name = "comment_id") final String commentId,
                                    @RequestParam(name = "user") final String user) {
+        final UpdateResult removeresult = reactionListMongoService.removeUserFromReactionList(commentId, user, ReactionList.ReactionType.LIKE);
+        if(removeresult.getMatchedCount()==removeresult.getModifiedCount()){
+            commentMongoService.removeLike(commentId);
+        }
         final UpdateResult result = reactionListMongoService.addUserToReactionList(commentId, user, ReactionList.ReactionType.DISLIKE);
         if(result.getMatchedCount()==result.getModifiedCount()){
             commentMongoService.addDislike(commentId);
