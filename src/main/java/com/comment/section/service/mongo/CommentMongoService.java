@@ -2,15 +2,14 @@ package com.comment.section.service.mongo;
 
 
 import com.comment.section.models.Comment;
+import com.comment.section.utils.PaginatedResults;
 import lombok.AllArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -61,17 +60,26 @@ public class CommentMongoService {
         return  mongoTemplate.findAndModify(Query.query(criteria), update, Comment.class);
     }
 
-    public Page<Comment> findByParentId(final String parentId,final Pageable pageable) {
+    public PaginatedResults findByParentId(final String parentId, final int size, final long cursor) {
 
-        final Query query = new Query().with(pageable)
+        final Query query = new Query()
+                .with(Sort.by(Sort.Direction.ASC, Comment.FieldConstants.ID))
                 .addCriteria(Criteria
                         .where(Comment.FieldConstants.PARENT_ID)
-                        .is(parentId));
+                        .is(parentId))
+                .limit(size);
+
+        if (cursor > 0) {
+            Criteria criteria = Criteria.where(Comment.FieldConstants.ID).gt(new ObjectId(Long.toHexString(cursor+1) + "0000000000000000"));
+            query.addCriteria(criteria);
+        }
         final List<Comment> comments =  mongoTemplate.find(query, Comment.class);
 
-        return PageableExecutionUtils.getPage(
-                comments,
-                pageable,
-                () -> mongoTemplate.count(query, Comment.class));
+        long nextCursor = 0;
+        if (!comments.isEmpty()) {
+            nextCursor = comments.get(comments.size() - 1).getId().getTimestamp();
+        }
+
+        return new PaginatedResults(comments, nextCursor);
     };
 }

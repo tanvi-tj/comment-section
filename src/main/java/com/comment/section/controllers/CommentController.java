@@ -6,10 +6,9 @@ import com.comment.section.models.ReactionList;
 import com.comment.section.service.mongo.CommentMongoService;
 import com.comment.section.service.mongo.PostMongoService;
 import com.comment.section.service.mongo.ReactionListMongoService;
+import com.comment.section.utils.PaginatedResults;
 import com.mongodb.client.result.UpdateResult;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -37,10 +36,10 @@ public class CommentController {
     }
 
     @GetMapping("/comments")
-    public Page<Comment> getCommentList(@RequestParam(name = "parent_id") final String parentId,
-                                        @RequestParam(name = "page", defaultValue = "0") final int page,
-                                        @RequestParam(name = "size", defaultValue = "100") final int size) {
-       return commentMongoService.findByParentId(parentId, PageRequest.of(page, size));
+    public PaginatedResults getCommentList(@RequestParam(name = "parent_id") final String parentId,
+                                           @RequestParam(name = "cursor", defaultValue = "0") final long cursorTimestamp,
+                                           @RequestParam(name = "size", defaultValue = "100") final int size) {
+       return commentMongoService.findByParentId(parentId, size, cursorTimestamp);
     }
 
     @GetMapping("/like/add")
