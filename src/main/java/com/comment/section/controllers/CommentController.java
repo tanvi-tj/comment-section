@@ -47,7 +47,7 @@ public class CommentController {
     public int addLike(@RequestParam(name = "comment_id") final String commentId,
                                 @RequestParam(name = "user") final String user) {
         final UpdateResult removeresult = reactionListMongoService.removeUserFromReactionList(commentId, user, ReactionList.ReactionType.DISLIKE);
-        if(removeresult.getMatchedCount()==removeresult.getModifiedCount()){
+        if(removeresult.getMatchedCount() ==1 && removeresult.getMatchedCount()==removeresult.getModifiedCount()){
             commentMongoService.removeDislike(commentId);
         }
         final UpdateResult addresult = reactionListMongoService.addUserToReactionList(commentId, user, ReactionList.ReactionType.LIKE);
@@ -61,8 +61,8 @@ public class CommentController {
     @GetMapping("/dislike/add")
     public int addDislike(@RequestParam(name = "comment_id") final String commentId,
                                    @RequestParam(name = "user") final String user) {
-        final UpdateResult removeresult = reactionListMongoService.removeUserFromReactionList(commentId, user, ReactionList.ReactionType.LIKE);
-        if(removeresult.getMatchedCount()==removeresult.getModifiedCount()){
+        final UpdateResult removeresult =  reactionListMongoService.removeUserFromReactionList(commentId, user, ReactionList.ReactionType.LIKE);
+        if(removeresult.getMatchedCount() ==1 && removeresult.getMatchedCount()==removeresult.getModifiedCount()){
             commentMongoService.removeLike(commentId);
         }
         final UpdateResult result = reactionListMongoService.addUserToReactionList(commentId, user, ReactionList.ReactionType.DISLIKE);
